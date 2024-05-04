@@ -1,40 +1,62 @@
 use bevy::prelude::*;
+use bevy::render::camera::ScalingMode;
+use bevy_rapier3d::rapier::dynamics::RigidBodyBuilder;
+use bevy_rapier3d::rapier::geometry::ColliderBuilder;
 #[allow(unused)]
 
 const SKY_COLOR: Color = Color::rgb(135.0 / 255.0, 206.0 / 255.0, 250.0 / 255.0);
 
+#[derive(Component)]
+pub struct Player{
+    pub speed: f32
+}
+
+#[derive(Resource)]
+pub struct Coins(pub f32);
+
+
+
+
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
+    let mut camera = Camera2dBundle::default();
+    
+    camera.projection.scaling_mode = ScalingMode::AutoMin{
+        min_width: 256.0,
+        min_height:144.0
+    };
+   
+    commands.spawn(camera);
 
     let texture = asset_server.load("pixil-frame-0.png");
 
-    commands.spawn(SpriteBundle {
-        sprite: Sprite {
-            custom_size: Some(Vec2::new(100.0, 100.0)),
+    commands.spawn((
+        SpriteBundle {
+            texture,
+            
             ..default()
         },
-        texture,
-        ..default()
-    });
+        Player {speed: 100.0},
+    ));
 }
 
 fn character_movement(
-    mut characters: Query<(&mut Transform, &Sprite)>,
+    mut characters: Query<(&mut Transform, &Player)>,
     input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    for (mut transform, _) in characters.iter_mut() {
+    for (mut transform, player) in characters.iter_mut() {
+        let movement_amt = player.speed * time.delta_seconds();
         if input.pressed(KeyCode::W) {
-            transform.translation.y += 200.0 * time.delta_seconds();
+            transform.translation.y += movement_amt;
         }
         if input.pressed(KeyCode::A) {
-            transform.translation.x -= 200.0 * time.delta_seconds();
+            transform.translation.x -= movement_amt;
         }
         if input.pressed(KeyCode::S) && transform.translation.y < 600.0 {
-            transform.translation.y -= 200.0 * time.delta_seconds();
+            transform.translation.y -= movement_amt;
         }
         if input.pressed(KeyCode::D) {
-            transform.translation.x += 200.0 * time.delta_seconds();
+            transform.translation.x += movement_amt;
         }
     }
 }
