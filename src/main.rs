@@ -1,8 +1,12 @@
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 #[allow(unused)]
+#[allow(dead_code)]
 
 const SKY_COLOR: Color = Color::rgb(135.0 / 255.0, 206.0 / 255.0, 250.0 / 255.0);
+
+#[derive(Debug, Component, Clone, Copy)]
+struct HitBox(Vec2);
 
 #[derive(Component)]
 pub struct Player{
@@ -34,6 +38,7 @@ fn setup(mut commands: Commands, asset_server: ResMut<AssetServer>) {
             ..default()
         },
         Player{speed: 100.0},
+        Grounded(true),
     ));
 }
 
@@ -90,6 +95,34 @@ fn character_movement(
     }
 }
 
+fn check_hit(hitbox: HitBox, offset: Vec3, other_hitbox: HitBox, other_offset: Vec3) -> bool {
+    let h_size = hitbox.0.y /2.;
+    let oh_size = other_hitbox.0.y /2.;
+    let w_size = hitbox.0.x /2.;
+    let ow_size = other_hitbox.0.x /2.;
+
+    offset.x + w_size > other_offset.x - ow_size && offset.x - w_size < other_offset.x + ow_size &&
+    offset.y + h_size > other_offset.y - oh_size && offset.y - h_size < other_offset.y + oh_size
+}
+
+#[derive(Component)]
+struct Grounded(bool);
+
+fn ground_detection(
+    mut player: Query<(&Transform, &mut Grounded), With<Player>>,
+    mut last: Local<Transform>,
+) {
+    let (pos,mut on_ground) = player.single_mut();
+    let current = if pos.translation.y == last.translation.y {
+        true
+    } else {
+        false
+    };
+    if current != on_ground.0 {
+        on_ground.0 = current;
+    }
+    *last = *pos;
+}
 
 
 fn main() {
@@ -112,5 +145,6 @@ fn main() {
         .add_systems(Update, character_movement)
         .add_systems(Update, player_jump)
         .add_systems(Update, player_fall)
+        .add_systems(Update, ground_detection)
         .run();
 }
