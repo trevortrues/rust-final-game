@@ -132,7 +132,7 @@ fn main() {
     let query = &args[1];
     
     if query == "ty" {
-        println!("hi");
+        println!("hii");
     }else if query == "trevor" {
         App::new()
             .add_plugins(
