@@ -29,7 +29,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         SpriteBundle {
             texture: player_texture,
             transform: Transform {
-                translation: Vec3::new(0.0, 0.0, 1.0),
+                translation: Vec3::new(-240.0, 0.0, 1.0),
                 scale: Vec3::splat(1.0),
                 ..default()
             },
@@ -46,6 +46,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let block_texture = asset_server.load("brick.png");
     let block_positions = vec![
+        Vec3::new(-240.0, -32.0, 0.0), 
         Vec3::new(-64.0, -32.0, 0.0), 
         Vec3::new(64.0, -32.0, 0.0),  
         Vec3::new(0.0, -32.0, 0.0),   
@@ -84,7 +85,7 @@ fn player_jump(
     let Ok((player, mut transform, mut jump)) = player.get_single_mut() else { return; };
     let jump_power = (time.delta_seconds() * FALL_SPEED * 2.).min(jump.0);
     jump.0 -= jump_power;
-    transform.translation.y += jump_power;
+    transform.translation.y += jump_power + 2.0;
     if jump.0 == 0. {
         commands.entity(player).remove::<Jump>();
     }
@@ -95,22 +96,25 @@ fn player_fall(
     blocks_query: Query<(&HitBox, &Transform), Without<Player>>,
     time: Res<Time>,
 ) {
-    for (mut transform, _, player_hitbox) in player_query.iter_mut() {
-        if transform.translation.y > 0.0 {
-            let fall_amount = time.delta_seconds() * FALL_SPEED;
-            let potential_new_position = Vec3::new(transform.translation.x, transform.translation.y - fall_amount, transform.translation.z);
+    let camera_height = 288.0; 
+    let camera_bottom = -camera_height / 2.0; 
 
-            if let Some(collision_y) = check_landing_collision(potential_new_position, player_hitbox, &blocks_query) {
-                transform.translation.y = collision_y;  
-            } else {
-                transform.translation.y -= fall_amount;
-                if transform.translation.y < 0.0 {
-                    transform.translation.y = 0.0;
-                }
+    for (mut transform, _, player_hitbox) in player_query.iter_mut() {
+        let fall_amount = time.delta_seconds() * FALL_SPEED;
+        let potential_new_position = Vec3::new(transform.translation.x, transform.translation.y - fall_amount, transform.translation.z);
+
+        if let Some(collision_y) = check_landing_collision(potential_new_position, player_hitbox, &blocks_query) {
+            transform.translation.y = collision_y;
+        } else {
+            transform.translation.y -= fall_amount;
+            if transform.translation.y < camera_bottom - 10.0 {
+                transform.translation = Vec3::new(-240.0, 0.0, 1.0); 
             }
         }
     }
 }
+
+
 
 fn check_landing_collision(
     new_position: Vec3, 
