@@ -3,7 +3,7 @@ use bevy::render::camera::ScalingMode;
 
 const SKY_COLOR: Color = Color::rgb(135.0 / 255.0, 206.0 / 255.0, 250.0 / 255.0);
 const MOVE_SPEED: f32 = 100.0;
-const FALL_SPEED: f32 = 98.0;
+const FALL_SPEED: f32 = 220.0;
 
 #[derive(Debug, Component, Clone, Copy)]
 struct HitBox(Vec2);
@@ -39,7 +39,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             ..default()
         },
-        Player { speed: 100.0 },
+        Player { speed: 200.0 },
         Grounded(true),
         HitBox(Vec2::new(32.0, 32.0)),
     ));
@@ -47,10 +47,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let block_texture = asset_server.load("brick.png");
     let block_positions = vec![
         Vec3::new(-240.0, -32.0, 0.0), 
-        Vec3::new(-64.0, -32.0, 0.0), 
-        Vec3::new(64.0, -32.0, 0.0),  
-        Vec3::new(0.0, -32.0, 0.0),   
-        Vec3::new(192.0, 16.0, 0.0),  
+        Vec3::new(-160.0, 0.0, 0.0), 
+        Vec3::new(-89.0, 15.0, 0.0), 
+        Vec3::new(4.0, -32.0, 0.0),  
+        Vec3::new(94.0, -32.0, 0.0),  
+
+        Vec3::new(172.0, 19.0, 0.0),  
+        Vec3::new(240.0, 49.0, 0.0),  
     ];
 
     for position in block_positions {
@@ -85,7 +88,8 @@ fn player_jump(
     let Ok((player, mut transform, mut jump)) = player.get_single_mut() else { return; };
     let jump_power = (time.delta_seconds() * FALL_SPEED * 2.).min(jump.0);
     jump.0 -= jump_power;
-    transform.translation.y += jump_power + 2.0;
+    transform.translation.y += jump_power + 10.0;
+    transform.translation.x += 3.0;
     if jump.0 == 0. {
         commands.entity(player).remove::<Jump>();
     }
