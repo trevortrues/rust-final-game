@@ -125,26 +125,35 @@ fn ground_detection(
 }
 
 
+use std::env;
+
 fn main() {
-    App::new()
-        .add_plugins(
-            DefaultPlugins
-                .set(ImagePlugin::default_nearest())
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: "rustfinal".into(),
-                        resolution: (1200.0, 800.0).into(),
-                        resizable: false,
+    let args: Vec<String> = env::args().collect();
+    let query = &args[1];
+    
+    if query == "ty" {
+        println!("hi");
+    }else if query == "trevor" {
+        App::new()
+            .add_plugins(
+                DefaultPlugins
+                    .set(ImagePlugin::default_nearest())
+                    .set(WindowPlugin {
+                        primary_window: Some(Window {
+                            title: "rustfinal".into(),
+                            resolution: (1200.0, 800.0).into(),
+                            resizable: false,
+                            ..default()
+                        }),
                         ..default()
-                    }),
-                    ..default()
-            })
-            .build(),
-        )
-        .add_systems(Startup, setup)
-        .add_systems(Update, character_movement)
-        .add_systems(Update, player_jump)
-        .add_systems(Update, player_fall)
-        .add_systems(Update, ground_detection)
-        .run();
+                })
+                .build(),
+            )
+            .add_systems(Startup, setup)
+            .add_systems(Update, character_movement)
+            .add_systems(Update, player_jump)
+            .add_systems(Update, player_fall)
+            .add_systems(Update, ground_detection)
+            .run();
+    }
 }
