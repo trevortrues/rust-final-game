@@ -19,8 +19,8 @@ pub struct Coins(pub f32);
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut camera = Camera2dBundle::default();
     camera.projection.scaling_mode = ScalingMode::AutoMin {
-        min_width: 256.0,
-        min_height: 144.0,
+        min_width: 512.0,  
+        min_height: 288.0,
     };
     commands.spawn(camera);
 
@@ -46,10 +46,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let block_texture = asset_server.load("brick.png");
     let block_positions = vec![
-        Vec3::new(-64.0, -64.0, 0.0),   
-        Vec3::new(64.0, -64.0, 0.0),   
-        Vec3::new(0.0, -128.0, 0.0),    
-        Vec3::new(0.0, 128.0, 0.0),   
+        Vec3::new(-64.0, -32.0, 0.0), 
+        Vec3::new(64.0, -32.0, 0.0),  
+        Vec3::new(0.0, -32.0, 0.0),   
+        Vec3::new(192.0, 16.0, 0.0),  
     ];
 
     for position in block_positions {
@@ -72,6 +72,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     }
 }
 
+
 #[derive(Component)]
 struct Jump(f32);
 
@@ -90,17 +91,64 @@ fn player_jump(
 }
 
 fn player_fall(
-    mut player: Query<&mut Transform, (With<Player>, Without<Jump>)>,
+    mut player_query: Query<(&mut Transform, &Player, &HitBox), Without<Jump>>,
+    blocks_query: Query<(&HitBox, &Transform), Without<Player>>,
     time: Res<Time>,
 ) {
-    let Ok(mut player) = player.get_single_mut() else { return; };
-    if player.translation.y > 0.0 {
-        player.translation.y -= time.delta_seconds() * FALL_SPEED;
-        if player.translation.y < 0.0 {
-            player.translation.y = 0.0
+    for (mut transform, _, player_hitbox) in player_query.iter_mut() {
+        if transform.translation.y > 0.0 {
+            let fall_amount = time.delta_seconds() * FALL_SPEED;
+            let potential_new_position = Vec3::new(transform.translation.x, transform.translation.y - fall_amount, transform.translation.z);
+
+            if let Some(collision_y) = check_landing_collision(potential_new_position, player_hitbox, &blocks_query) {
+                transform.translation.y = collision_y;  
+            } else {
+                transform.translation.y -= fall_amount;
+                if transform.translation.y < 0.0 {
+                    transform.translation.y = 0.0;
+                }
+            }
         }
     }
 }
+
+fn check_landing_collision(
+    new_position: Vec3, 
+    player_hitbox: &HitBox, 
+    blocks: &Query<(&HitBox, &Transform), Without<Player>>
+) -> Option<f32> {
+
+    let player_bottom = new_position.y - player_hitbox.0.y / 2.0;
+
+    for (block_hitbox, block_transform) in blocks.iter() {
+        let block_top = block_transform.translation.y + block_hitbox.0.y / 2.0;
+        let block_bottom = block_transform.translation.y - block_hitbox.0.y / 2.0;
+
+        if player_bottom <= block_top && player_bottom >= block_bottom {
+            if check_horizontal_overlap(new_position, player_hitbox, block_transform, block_hitbox) {
+                return Some(block_top + player_hitbox.0.y / 2.0);
+            }
+        }
+    }
+
+    None
+}
+
+fn check_horizontal_overlap(
+    player_position: Vec3, 
+    player_hitbox: &HitBox, 
+    block_transform: &Transform, 
+    block_hitbox: &HitBox
+) -> bool {
+    let player_left = player_position.x - player_hitbox.0.x / 2.0;
+    let player_right = player_position.x + player_hitbox.0.x / 2.0;
+    let block_left = block_transform.translation.x - block_hitbox.0.x / 2.0;
+    let block_right = block_transform.translation.x + block_hitbox.0.x / 2.0;
+
+    player_right > block_left && player_left < block_right
+}
+
+
 
 fn character_movement(
     mut commands: Commands,
@@ -134,7 +182,6 @@ fn character_movement(
             transform.translation.y = vertical_pos.y;
         }
 
-        // Jumping logic
         if input.just_pressed(KeyCode::W) && jump.is_none() {
             commands.entity(entity).insert(Jump(25.0));
         }
