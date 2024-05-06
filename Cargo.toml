@@ -10,7 +10,7 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = { version = "0.11", features = ["dynamic_linking"] } 
+bevy = { version = "0.11" } 
 bevy_rapier2d = "0.22"
 minifb = "0.25.0"
 num = "0.4.1"
