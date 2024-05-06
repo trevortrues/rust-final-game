@@ -529,23 +529,23 @@ fn main() {
             .unwrap();
         }
 
-    }else if query == "trevor" {
+    }
+    
+   if query == "trevor" {
         App::new()
             .add_plugins(
                 DefaultPlugins
-                    .set(ImagePlugin::default_nearest())
-                    .set(WindowPlugin {
-                        primary_window: Some(Window {
-                            title: "rustfinal".into(),
-                            resolution: (1200.0, 800.0).into(),
-                            resizable: false,
-                            ..default()
-                        }),
+                .set(ImagePlugin::default_nearest())
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "rustfinal".into(),
+                        resolution: (1200.0, 800.0).into(),
+                        resizable: false,
                         ..default()
                     }),
                     ..default()
-                })
-                .build(),
+            })
+            .build()
         )
         .add_systems(Startup, setup)
         .add_systems(Update, character_movement)
@@ -554,4 +554,5 @@ fn main() {
         .add_systems(Update, ground_detection)
         .add_systems(Update, coin_pickup)
         .run();
+    }
 }
