@@ -281,7 +281,6 @@ fn ground_detection(
     *last = *pos;
 }
 
-
 use std::cmp::max;
 
 fn coin_pickup(
@@ -318,38 +317,37 @@ use colors::Colors;
 fn main() {
     let args: Vec<String> = env::args().collect();
     let query = &args[1];
-    
+
     if query == "ty" {
         // use linalg::vec2::Vec2;
         // use linalg::{matrix::Mat4x4, vec4::Vec4};
         use minifb::{Key, Window, WindowOptions};
         use rand::Rng;
 
-        use mki::{bind_key, Action, InhibitEvent, Keyboard, Sequence};
+        // use mki::{bind_key, Action, InhibitEvent, Keyboard, Sequence};
 
         const WIDTH: usize = 640;
         const HEIGHT: usize = 360;
 
-
         let mut canvas = Canvas::new(WIDTH, HEIGHT);
 
         let mut window = Window::new(
-        "Test - ESC to exit",
-        WIDTH,
-        HEIGHT,
-        WindowOptions {
-            resize: true,
-            ..Default::default()
-        },
-    )
-    .unwrap_or_else(|e| {
-        panic!("{}", e);
-    });
+            "Test - ESC to exit",
+            WIDTH,
+            HEIGHT,
+            WindowOptions {
+                resize: true,
+                ..Default::default()
+            },
+        )
+        .unwrap_or_else(|e| {
+            panic!("{}", e);
+        });
 
-    // Limit to max ~60 fps update rate
-    window.limit_update_rate(Some(std::time::Duration::from_millis(100)));
+        // Limit to max ~60 fps update rate
+        window.limit_update_rate(Some(std::time::Duration::from_millis(100)));
 
-        let mut player_array_pos:(isize, isize) = (10, 10);
+        let mut player_array_pos: (isize, isize) = (10, 10);
 
         let mut x_pos = 1;
         let mut forward = true;
@@ -371,18 +369,17 @@ fn main() {
             canvas.clear();
             player_array_pos.1 += up_velo;
 
-            if player_array_pos.0 == 18 || player_array_pos.0  == 0 || player_array_pos.1 == 0 {
+            if player_array_pos.0 == 18 || player_array_pos.0 == 0 || player_array_pos.1 == 0 {
                 println!("dead");
                 if level == 1 {
                     player_array_pos = (10, 10);
                     right_velo = 0;
                     up_velo = 0;
-                }else if level == 2 {
+                } else if level == 2 {
                     player_array_pos = (2, 5);
                     right_velo = 0;
                     up_velo = 0;
-                }
-                else if level == 3 {
+                } else if level == 3 {
                     player_array_pos = (17, 5);
                     right_velo = 0;
                     up_velo = 0;
@@ -395,20 +392,20 @@ fn main() {
                 up_velo = 0;
             }
 
-            if mki::are_pressed(&[Keyboard::A]){
+            if window.is_key_down(Key::A) {
                 right_velo = -1;
-            }else if mki::are_pressed(&[Keyboard::D]){
+            } else if window.is_key_down(Key::D) {
                 right_velo = 1;
-            }else {
+            } else {
                 right_velo = 0;
             }
 
             if collisions[player_array_pos.0 as usize][(player_array_pos.1 - 1) as usize] == false {
                 up_velo = max(-1, up_velo - 1);
-            }else {
-                if level == 3 && (player_array_pos.0 == 2 || player_array_pos.0 == 3){
+            } else {
+                if level == 3 && (player_array_pos.0 == 2 || player_array_pos.0 == 3) {
                     up_velo = 1;
-                }else {
+                } else {
                     up_velo = 0;
                 }
             }
@@ -418,16 +415,21 @@ fn main() {
                 player_array_pos.1 += 2;
             }
 
-            if collisions[player_array_pos.0 as usize][(player_array_pos.1 - 1) as usize] == true && mki::are_pressed(&[Keyboard::W]) {
+            if collisions[player_array_pos.0 as usize][(player_array_pos.1 - 1) as usize] == true
+                && window.is_key_down(Key::W)
+            {
                 up_velo = 3;
             }
 
-
-            if collisions[(player_array_pos.0 - 1) as usize][player_array_pos.1 as usize] == false && right_velo < 0 {
+            if collisions[(player_array_pos.0 - 1) as usize][player_array_pos.1 as usize] == false
+                && right_velo < 0
+            {
                 player_array_pos.0 -= 1;
             }
 
-            if collisions[(player_array_pos.0 + 1) as usize][player_array_pos.1 as usize] == false && right_velo > 0 {
+            if collisions[(player_array_pos.0 + 1) as usize][player_array_pos.1 as usize] == false
+                && right_velo > 0
+            {
                 player_array_pos.0 += 1;
             }
 
@@ -438,7 +440,7 @@ fn main() {
                     player_array_pos = (10, 10);
                     right_velo = 0;
                     up_velo = 0;
-                }else if level == 2 {
+                } else if level == 2 {
                     player_array_pos = (2, 5);
                     right_velo = 0;
                     up_velo = 0;
@@ -460,7 +462,7 @@ fn main() {
                         collisions[14][n] = true;
                         collisions[15][n] = true;
                     }
-                }else if level == 3 {
+                } else if level == 3 {
                     player_array_pos = (17, 5);
                     right_velo = 0;
                     up_velo = 0;
@@ -471,15 +473,18 @@ fn main() {
 
             if level == 3 {
                 collisions = vec![vec![false; 19]; 19];
-                collisions[18-x_pos][1] = true;
-                collisions[17-x_pos][1] = true;
+                collisions[18 - x_pos][1] = true;
+                collisions[17 - x_pos][1] = true;
                 collisions[2][14 - x_pos] = true;
                 collisions[3][14 - x_pos] = true;
                 collisions[10][10] = true;
                 collisions[11][10] = true;
             }
 
-            let player_pos = ((player_array_pos.0 as f32 - 10.0) * 0.1, (player_array_pos.1 as f32 - 10.0) * 0.1);
+            let player_pos = (
+                (player_array_pos.0 as f32 - 10.0) * 0.1,
+                (player_array_pos.1 as f32 - 10.0) * 0.1,
+            );
             canvas.set_color(Colors::WHITE);
 
             if level == 1 {
@@ -494,15 +499,43 @@ fn main() {
             }
 
             if level == 3 {
-                canvas.sqr((0.7 - (x_pos as f32 / 10.0), -0.8), (0.9 - (x_pos as f32 / 10.0), -0.8), (0.9 - (x_pos as f32 / 10.0), -0.9), (0.7 - (x_pos as f32 / 10.0), -0.9));
-                canvas.sqr((-0.8, 0.4 - (x_pos as f32 / 10.0)), (-0.6, 0.4 - (x_pos as f32 / 10.0)), (-0.6, 0.3 - (x_pos as f32 / 10.0)), (-0.8, 0.3 - (x_pos as f32 / 10.0)));
+                canvas.sqr(
+                    (0.7 - (x_pos as f32 / 10.0), -0.8),
+                    (0.9 - (x_pos as f32 / 10.0), -0.8),
+                    (0.9 - (x_pos as f32 / 10.0), -0.9),
+                    (0.7 - (x_pos as f32 / 10.0), -0.9),
+                );
+                canvas.sqr(
+                    (-0.8, 0.4 - (x_pos as f32 / 10.0)),
+                    (-0.6, 0.4 - (x_pos as f32 / 10.0)),
+                    (-0.6, 0.3 - (x_pos as f32 / 10.0)),
+                    (-0.8, 0.3 - (x_pos as f32 / 10.0)),
+                );
                 canvas.sqr((0.0, 0.0), (0.2, 0.0), (0.2, 0.1), (0.0, 0.1));
             }
 
-            canvas.sqr((0.1 + player_pos.0, 0.1 + player_pos.1), (0.1 + player_pos.0, 0.0 + player_pos.1), (0.0 + player_pos.0, 0.0 + player_pos.1), (0.0 + player_pos.0, 0.1 + player_pos.1));
+            canvas.sqr(
+                (0.1 + player_pos.0, 0.1 + player_pos.1),
+                (0.1 + player_pos.0, 0.0 + player_pos.1),
+                (0.0 + player_pos.0, 0.0 + player_pos.1),
+                (0.0 + player_pos.0, 0.1 + player_pos.1),
+            );
 
             canvas.set_color(Colors::BLUE);
-            canvas.tri((0.15 + (victory_pos.0 - 10) as f32 / 10.0, 0.03 + (victory_pos.1 - 10) as f32 / -10.0), (0.1 + (victory_pos.0 - 10) as f32 / 10.0, 0.09 + (victory_pos.1 - 10) as f32  / -10.0), (0.05 + (victory_pos.0 - 10) as f32 / 10.0, 0.03 + (victory_pos.1 - 10) as f32  / -10.0));
+            canvas.tri(
+                (
+                    0.15 + (victory_pos.0 - 10) as f32 / 10.0,
+                    0.03 + (victory_pos.1 - 10) as f32 / -10.0,
+                ),
+                (
+                    0.1 + (victory_pos.0 - 10) as f32 / 10.0,
+                    0.09 + (victory_pos.1 - 10) as f32 / -10.0,
+                ),
+                (
+                    0.05 + (victory_pos.0 - 10) as f32 / 10.0,
+                    0.03 + (victory_pos.1 - 10) as f32 / -10.0,
+                ),
+            );
 
             canvas.set_color(Colors::RED);
             canvas.line((-1.0, -1.0), (-1.0, 1.0));
@@ -516,43 +549,42 @@ fn main() {
 
             if x_pos == 12 {
                 forward = !forward;
-            }else if x_pos == 1 {
+            } else if x_pos == 1 {
                 forward = true;
             }
 
-            if(level == 4){
+            if (level == 4) {
                 println!("ultimate mega winner");
             }
 
             window
-            .update_with_buffer(canvas.buffer(), WIDTH, HEIGHT)
-            .unwrap();
+                .update_with_buffer(canvas.buffer(), WIDTH, HEIGHT)
+                .unwrap();
         }
-
     }
-    
-   if query == "trevor" {
+
+    if query == "trevor" {
         App::new()
             .add_plugins(
                 DefaultPlugins
-                .set(ImagePlugin::default_nearest())
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: "rustfinal".into(),
-                        resolution: (1200.0, 800.0).into(),
-                        resizable: false,
+                    .set(ImagePlugin::default_nearest())
+                    .set(WindowPlugin {
+                        primary_window: Some(Window {
+                            title: "rustfinal".into(),
+                            resolution: (1200.0, 800.0).into(),
+                            resizable: false,
+                            ..default()
+                        }),
                         ..default()
-                    }),
-                    ..default()
-            })
-            .build()
-        )
-        .add_systems(Startup, setup)
-        .add_systems(Update, character_movement)
-        .add_systems(Update, player_jump)
-        .add_systems(Update, player_fall)
-        .add_systems(Update, ground_detection)
-        .add_systems(Update, coin_pickup)
-        .run();
+                    })
+                    .build(),
+            )
+            .add_systems(Startup, setup)
+            .add_systems(Update, character_movement)
+            .add_systems(Update, player_jump)
+            .add_systems(Update, player_fall)
+            .add_systems(Update, ground_detection)
+            .add_systems(Update, coin_pickup)
+            .run();
     }
 }
